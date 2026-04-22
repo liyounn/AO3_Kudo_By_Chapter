@@ -1,0 +1,33 @@
+# ── Cloudflare / Wrangler ─────────────────────────────────────────────────────
+.wrangler/
+.dev.vars          # local secrets file — never commit this
+wrangler.toml.bak
+
+# ── Node (if you ever add a build step) ──────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-error.log*
+.pnp/
+.pnp.js
+
+# ── Secrets & Environment ─────────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+*.secret
+
+# ── OS clutter ────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Editor clutter ────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ── Extension build output (if you add a bundler later) ──────────────────────
+extension/dist/
+extension/*.zip

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chapter Kudos</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap');
+
+    :root {
+      --ink: #2c1810;
+      --parchment: #fdf6ec;
+      --red: #8b2020;
+      --border: #c8a882;
+      --muted: #7a5c4a;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 300px;
+      background: var(--parchment);
+      color: var(--ink);
+      font-family: 'EB Garamond', Georgia, serif;
+    }
+
+    header {
+      background: var(--red);
+      color: white;
+      padding: 0.9rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .header-heart { font-size: 1.1rem; }
+
+    .header-title {
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    .header-sub {
+      font-size: 0.72rem;
+      opacity: 0.8;
+      font-style: italic;
+      margin-left: auto;
+    }
+
+    .empty {
+      padding: 1.8rem 1rem;
+      text-align: center;
+      font-style: italic;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .section-label {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      padding: 0.6rem 0.9rem 0.3rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .history-list { list-style: none; }
+
+    .history-item {
+      padding: 0.6rem 0.9rem;
+      border-bottom: 1px solid #f0e0cc;
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .history-item:last-child { border-bottom: none; }
+
+    .history-title {
+      font-size: 0.85rem;
+      color: var(--ink);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .history-meta {
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .history-link {
+      font-size: 0.7rem;
+      color: var(--red);
+      text-decoration: none;
+      opacity: 0.8;
+    }
+
+    .history-link:hover { opacity: 1; text-decoration: underline; }
+
+    footer {
+      padding: 0.6rem 0.9rem;
+      font-size: 0.68rem;
+      color: var(--muted);
+      text-align: center;
+      border-top: 1px solid var(--border);
+      font-style: italic;
+    }
+
+    footer a { color: var(--red); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <span class="header-heart">♥</span>
+    <span class="header-title">Chapter Kudos</span>
+    <span class="header-sub">your history</span>
+  </header>
+
+  <div id="content"></div>
+
+  <footer>
+    <a href="https://github.com/YOUR_USERNAME/ao3-chapter-kudos" target="_blank">
+      open source
+    </a>
+    &nbsp;·&nbsp; your votes stay on your device
+  </footer>
+
+  <script>
+    chrome.storage.local.get(['recentVotes'], result => {
+      const votes   = result.recentVotes || [];
+      const content = document.getElementById('content');
+
+      if (votes.length === 0) {
+        content.innerHTML = `
+          <div class="empty">
+            No chapter kudos yet.<br/>
+            Visit an AO3 work with the<br/>Chapter Kudos skin to get started.
+          </div>`;
+        return;
+      }
+
+      const label = document.createElement('div');
+      label.className = 'section-label';
+      label.textContent = `Recent kudos (${votes.length})`;
+      content.appendChild(label);
+
+      const ul = document.createElement('ul');
+      ul.className = 'history-list';
+
+      votes.slice(0, 12).forEach(v => {
+        const li       = document.createElement('li');
+        li.className   = 'history-item';
+        const date     = new Date(v.ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        const shortTitle = v.title.replace(/ - Archive of Our Own$/, '').trim();
+
+        li.innerHTML = `
+          <span class="history-title">${escHtml(shortTitle)}</span>
+          <span class="history-meta">Chapter ${escHtml(v.chapterId)} &middot; ${date}</span>
+          <a class="history-link" href="${escHtml(v.url)}" target="_blank">Visit work →</a>
+        `;
+        ul.appendChild(li);
+      });
+
+      content.appendChild(ul);
+    });
+
+    function escHtml(s) {
+      return String(s)
+        .replace(/&/g,'&amp;')
+        .replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;');
+    }
+  </script>
+</body>
+</html>

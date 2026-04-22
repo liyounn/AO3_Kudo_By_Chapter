@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chapter Kudos — Writer Dashboard</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Courier+Prime&display=swap');
+
+    :root {
+      --ink: #2c1810;
+      --parchment: #fdf6ec;
+      --parchment-dark: #f5e6d0;
+      --red: #8b2020;
+      --red-light: #c0392b;
+      --gold: #8b6914;
+      --muted: #7a5c4a;
+      --border: #c8a882;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--parchment);
+      color: var(--ink);
+      font-family: 'EB Garamond', Georgia, serif;
+      min-height: 100vh;
+      padding: 2rem 1rem 4rem;
+    }
+
+    /* ── Layout ── */
+    .container { max-width: 740px; margin: 0 auto; }
+
+    /* ── Header ── */
+    header {
+      text-align: center;
+      padding: 2rem 0 2.5rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2.5rem;
+    }
+
+    .logo {
+      font-size: 2rem;
+      color: var(--red);
+      letter-spacing: 0.04em;
+      margin-bottom: 0.3rem;
+    }
+
+    .tagline {
+      font-style: italic;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    /* ── Login form ── */
+    .login-card {
+      max-width: 420px;
+      margin: 3rem auto;
+      padding: 2rem;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: 0 2px 16px rgba(44,24,16,0.08);
+    }
+
+    .login-card h2 {
+      font-size: 1.2rem;
+      margin-bottom: 1.4rem;
+      color: var(--ink);
+    }
+
+    .field { margin-bottom: 1rem; }
+
+    .field label {
+      display: block;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+    }
+
+    .field input {
+      width: 100%;
+      padding: 0.55rem 0.8rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-family: 'Courier Prime', monospace;
+      font-size: 0.95rem;
+      background: var(--parchment);
+      color: var(--ink);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .field input:focus {
+      outline: none;
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px rgba(139,32,32,0.12);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 0.65rem;
+      background: var(--red);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-family: 'EB Garamond', serif;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      margin-top: 0.5rem;
+    }
+
+    .btn:hover { background: var(--red-light); transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+
+    .error-msg {
+      color: var(--red);
+      font-size: 0.88rem;
+      font-style: italic;
+      margin-top: 0.8rem;
+      text-align: center;
+      min-height: 1.2em;
+    }
+
+    /* ── Dashboard ── */
+    #dashboard { display: none; }
+
+    .work-header {
+      margin-bottom: 2rem;
+    }
+
+    .work-id {
+      font-family: 'Courier Prime', monospace;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 0.3rem;
+    }
+
+    .work-title {
+      font-size: 1.6rem;
+      color: var(--ink);
+    }
+
+    .total-badge {
+      display: inline-block;
+      margin-top: 0.5rem;
+      padding: 0.25rem 0.9rem;
+      background: var(--parchment-dark);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      font-size: 0.85rem;
+      color: var(--gold);
+      font-style: italic;
+    }
+
+    /* ── Chart ── */
+    .chart-section {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.6rem 1.6rem 1rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 1px 8px rgba(44,24,16,0.05);
+    }
+
+    .section-title {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--gold);
+      margin-bottom: 1.4rem;
+    }
+
+    .chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+      height: 160px;
+      padding-bottom: 28px;
+      position: relative;
+    }
+
+    .chart-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 4px;
+      height: 100%;
+      position: relative;
+    }
+
+    .chart-bar {
+      width: 100%;
+      background: var(--red);
+      border-radius: 3px 3px 0 0;
+      opacity: 0.8;
+      transition: opacity 0.2s, transform 0.2s;
+      min-height: 3px;
+      position: relative;
+      cursor: default;
+    }
+
+    .chart-bar:hover { opacity: 1; }
+
+    .chart-bar-tooltip {
+      display: none;
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--ink);
+      color: var(--parchment);
+      font-size: 0.72rem;
+      padding: 3px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+      pointer-events: none;
+      font-family: 'Courier Prime', monospace;
+    }
+
+    .chart-bar:hover .chart-bar-tooltip { display: block; }
+
+    .chart-label {
+      position: absolute;
+      bottom: 0;
+      font-size: 0.68rem;
+      color: var(--muted);
+      font-family: 'Courier Prime', monospace;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+      text-align: center;
+    }
+
+    /* ── Drop-off table ── */
+    .table-section {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 8px rgba(44,24,16,0.05);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+
+    thead tr {
+      background: var(--parchment-dark);
+    }
+
+    th {
+      padding: 0.7rem 1rem;
+      text-align: left;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      font-weight: normal;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 0.65rem 1rem;
+      border-bottom: 1px solid #f0e0cc;
+      font-family: 'Courier Prime', monospace;
+      font-size: 0.88rem;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: var(--parchment); }
+
+    .drop-indicator {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 6px;
+    }
+
+    .drop-ok   { background: #27ae60; }
+    .drop-warn { background: #f39c12; }
+    .drop-bad  { background: var(--red); }
+
+    /* ── Loading ── */
+    .loading {
+      text-align: center;
+      padding: 3rem;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border);
+      border-top-color: var(--red);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-right: 0.5rem;
+      vertical-align: middle;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    footer {
+      text-align: center;
+      margin-top: 3rem;
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    footer a { color: var(--gold); }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="logo">♥ Chapter Kudos</div>
+    <div class="tagline">Writer Dashboard</div>
+  </header>
+
+  <!-- Login -->
+  <div id="login">
+    <div class="login-card">
+      <h2>Access your dashboard</h2>
+      <div class="field">
+        <label>Work ID</label>
+        <input type="text" id="input-work-id" placeholder="e.g. 12345678" inputmode="numeric"/>
+      </div>
+      <div class="field">
+        <label>Secret Key</label>
+        <input type="password" id="input-secret" placeholder="your WRITER_SECRET value"/>
+      </div>
+      <button class="btn" id="btn-load">View Dashboard</button>
+      <div class="error-msg" id="error-msg"></div>
+    </div>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="dashboard">
+    <div class="work-header">
+      <div class="work-id" id="dash-work-id"></div>
+      <div class="work-title">Chapter Kudos Overview</div>
+      <span class="total-badge" id="dash-total"></span>
+    </div>
+
+    <div id="dash-loading" class="loading">
+      <span class="spinner"></span> Loading kudos data…
+    </div>
+
+    <div id="dash-content" style="display:none">
+      <div class="chart-section">
+        <div class="section-title">Kudos per Chapter</div>
+        <div class="chart" id="dash-chart"></div>
+      </div>
+
+      <div class="table-section">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Chapter ID</th>
+              <th>Kudos</th>
+              <th>Drop-off from prev.</th>
+            </tr>
+          </thead>
+          <tbody id="dash-table"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <a href="https://github.com/YOUR_USERNAME/ao3-chapter-kudos" target="_blank">
+      ao3-chapter-kudos
+    </a>
+    — open source, self-hosted, reader-owned
+  </footer>
+
+</div>
+
+<script>
+  const $ = id => document.getElementById(id);
+
+  let workerBase = window.location.origin; // dashboard is served from the worker itself
+
+  // ── Login ──────────────────────────────────────────────────────────────────
+  $('btn-load').addEventListener('click', loadDashboard);
+  [$('input-work-id'), $('input-secret')].forEach(el =>
+    el.addEventListener('keydown', e => e.key === 'Enter' && loadDashboard())
+  );
+
+  async function loadDashboard() {
+    const workId = $('input-work-id').value.trim();
+    const secret = $('input-secret').value.trim();
+    $('error-msg').textContent = '';
+
+    if (!workId || !/^\d+$/.test(workId)) {
+      $('error-msg').textContent = 'Please enter a valid numeric Work ID.';
+      return;
+    }
+    if (!secret) {
+      $('error-msg').textContent = 'Please enter your secret key.';
+      return;
+    }
+
+    $('btn-load').disabled = true;
+    $('btn-load').textContent = 'Loading…';
+
+    try {
+      const res = await fetch(`${workerBase}/dashboard/${workId}?key=${encodeURIComponent(secret)}`);
+      if (res.status === 401) {
+        $('error-msg').textContent = 'Incorrect secret key.';
+        return;
+      }
+      if (!res.ok) throw new Error('Server error');
+
+      const data = await res.json();
+      renderDashboard(workId, data);
+    } catch (e) {
+      $('error-msg').textContent = 'Could not connect to your worker. Check the URL.';
+    } finally {
+      $('btn-load').disabled = false;
+      $('btn-load').textContent = 'View Dashboard';
+    }
+  }
+
+  // ── Render ─────────────────────────────────────────────────────────────────
+  function renderDashboard(workId, data) {
+    $('login').style.display = 'none';
+    $('dashboard').style.display = 'block';
+    $('dash-loading').style.display = 'none';
+    $('dash-content').style.display = 'block';
+
+    $('dash-work-id').textContent = `Work ID: ${workId}`;
+    $('dash-total').textContent = `${data.total} total chapter kudos`;
+
+    const chapters = data.chapters;
+    const max = Math.max(...chapters.map(c => c.count), 1);
+
+    // Chart
+    const chart = $('dash-chart');
+    chart.innerHTML = '';
+    chapters.forEach((ch, i) => {
+      const col  = document.createElement('div');
+      col.className = 'chart-col';
+
+      const bar  = document.createElement('div');
+      bar.className = 'chart-bar';
+      const pct = Math.max((ch.count / max) * 132, 3);
+      bar.style.height = `${pct}px`;
+
+      const tip = document.createElement('div');
+      tip.className = 'chart-bar-tooltip';
+      tip.textContent = `${ch.count} kudos`;
+      bar.appendChild(tip);
+
+      const lbl = document.createElement('div');
+      lbl.className = 'chart-label';
+      lbl.textContent = `Ch.${i + 1}`;
+
+      col.appendChild(bar);
+      col.appendChild(lbl);
+      chart.appendChild(col);
+    });
+
+    // Table
+    const tbody = $('dash-table');
+    tbody.innerHTML = '';
+    chapters.forEach((ch, i) => {
+      const prev = i > 0 ? chapters[i - 1].count : null;
+      const drop = prev !== null && prev > 0
+        ? Math.round(((ch.count - prev) / prev) * 100)
+        : null;
+
+      let dotClass = 'drop-ok';
+      let dropText = i === 0 ? '—' : `${drop > 0 ? '+' : ''}${drop}%`;
+      if (drop !== null && drop < -30) dotClass = 'drop-bad';
+      else if (drop !== null && drop < -10) dotClass = 'drop-warn';
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${i + 1}</td>
+        <td>${ch.chapterId}</td>
+        <td>${ch.count}</td>
+        <td>
+          ${drop !== null
+            ? `<span class="drop-indicator ${dotClass}"></span>${dropText}`
+            : '—'}
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+</script>
+</body>
+</html>

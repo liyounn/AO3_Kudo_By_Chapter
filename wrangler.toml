@@ -1,0 +1,20 @@
+name = "ao3-chapter-kudos"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+# ── KV Namespaces ─────────────────────────────────────────────────────────────
+# After running `wrangler kv:namespace create KUDOS_KV`, paste the
+# returned id below.
+[[kv_namespaces]]
+binding = "KUDOS_KV"
+id      = "PASTE_YOUR_KV_NAMESPACE_ID_HERE"
+
+# ── Environment variables ─────────────────────────────────────────────────────
+# Set WRITER_SECRET via the Cloudflare dashboard (Workers > Settings > Variables)
+# or uncomment the line below for local dev only — never commit a real secret.
+# [vars]
+# WRITER_SECRET = "your-secret-here"
+
+# ── Routes ────────────────────────────────────────────────────────────────────
+# The worker will be available at:
+# https://ao3-chapter-kudos.<your-subdomain>.workers.dev

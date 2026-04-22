@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Install Chapter Kudos Bookmarklet</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Courier+Prime&display=swap');
+
+    :root {
+      --ink: #2c1810; --parchment: #fdf6ec; --parchment-dark: #f5e6d0;
+      --red: #8b2020; --border: #c8a882; --muted: #7a5c4a; --gold: #8b6914;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--parchment);
+      color: var(--ink);
+      font-family: 'EB Garamond', Georgia, serif;
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 2rem 1.2rem 4rem;
+      line-height: 1.7;
+    }
+
+    header {
+      text-align: center;
+      padding: 2rem 0 2rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2.5rem;
+    }
+
+    .logo  { font-size: 2rem; color: var(--red); margin-bottom: 0.3rem; }
+    .sub   { font-style: italic; color: var(--muted); }
+
+    h2 {
+      font-size: 1.1rem;
+      color: var(--red);
+      margin: 2rem 0 0.6rem;
+      letter-spacing: 0.02em;
+    }
+
+    p { margin-bottom: 0.8rem; color: var(--ink); font-size: 1rem; }
+
+    .step {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      margin-bottom: 1.4rem;
+      padding: 1rem 1.2rem;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .step-num {
+      font-size: 1.4rem;
+      color: var(--red);
+      font-weight: 600;
+      min-width: 1.6rem;
+      line-height: 1.4;
+    }
+
+    .step-body { flex: 1; }
+    .step-body strong { color: var(--ink); }
+
+    .bookmarklet-btn {
+      display: inline-block;
+      padding: 0.55rem 1.3rem;
+      background: var(--red);
+      color: white;
+      border-radius: 99px;
+      font-family: 'EB Garamond', serif;
+      font-size: 1rem;
+      text-decoration: none;
+      cursor: grab;
+      user-select: none;
+      margin: 0.5rem 0;
+      box-shadow: 0 2px 8px rgba(139,32,32,0.25);
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .bookmarklet-btn:hover { background: #a02525; transform: translateY(-1px); }
+
+    .platform-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .tab {
+      padding: 0.4rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      background: white;
+      color: var(--muted);
+      transition: all 0.15s;
+    }
+
+    .tab.active {
+      background: var(--red);
+      color: white;
+      border-color: var(--red);
+    }
+
+    .platform-steps { display: none; }
+    .platform-steps.active { display: block; }
+
+    code {
+      font-family: 'Courier Prime', monospace;
+      font-size: 0.88rem;
+      background: var(--parchment-dark);
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+    }
+
+    .note {
+      font-size: 0.85rem;
+      font-style: italic;
+      color: var(--muted);
+      padding: 0.7rem 1rem;
+      border-left: 2px solid var(--border);
+      margin: 1rem 0;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px dashed var(--border);
+      margin: 2.5rem 0;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-style: italic;
+      margin-top: 3rem;
+    }
+
+    footer a { color: var(--gold); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">♥ Chapter Kudos</div>
+  <div class="sub">Bookmarklet Install Guide</div>
+</header>
+
+<p>
+  The bookmarklet adds chapter kudos buttons to any AO3 work that has the
+  skin applied. It works on <strong>any browser, any device</strong> —
+  including mobile.
+</p>
+
+<!-- The draggable bookmarklet link — href is filled by the Worker -->
+<div style="text-align:center; margin: 1.5rem 0;">
+  <a class="bookmarklet-btn" id="bm-link" href="#">♥ AO3 Chapter Kudos</a>
+  <br/>
+  <small style="color:var(--muted); font-style:italic; font-size:0.8rem;">
+    On desktop: drag this to your bookmarks bar ↑
+  </small>
+</div>
+
+<hr class="divider"/>
+
+<h2>Install by platform</h2>
+
+<div class="platform-tabs">
+  <button class="tab active" data-tab="desktop">Desktop (Chrome / Firefox)</button>
+  <button class="tab" data-tab="ios">iPhone / iPad (Safari)</button>
+  <button class="tab" data-tab="android">Android (Chrome)</button>
+</div>
+
+<!-- Desktop -->
+<div class="platform-steps active" id="tab-desktop">
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-body">
+      <strong>Show your bookmarks bar</strong> if it's hidden.<br/>
+      Chrome: <code>Ctrl+Shift+B</code> &nbsp;|&nbsp; Firefox: <code>View → Toolbars → Bookmarks</code>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-body">
+      <strong>Drag the red button above</strong> into your bookmarks bar.
+      That's it — you're done.
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-body">
+      <strong>To use it:</strong> visit an AO3 work with the Chapter Kudos skin,
+      then click the bookmark. Kudos buttons will appear at the end of each chapter.
+    </div>
+  </div>
+</div>
+
+<!-- iOS -->
+<div class="platform-steps" id="tab-ios">
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-body">
+      <strong>Bookmark this page.</strong> Tap the Share button (the box with an arrow)
+      → <em>Add Bookmark</em>. Save it anywhere.
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-body">
+      <strong>Edit the bookmark.</strong> Open your Bookmarks, find the one you just saved,
+      tap <em>Edit</em>.
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-body">
+      <strong>Replace the URL</strong> with the code below.
+      Select all the text in the URL field and paste this over it:
+      <br/><br/>
+      <code id="bm-code-ios" style="word-break:break-all; display:block; padding:0.6rem; line-height:1.5;">
+        Loading…
+      </code>
+      <br/>
+      Tap <em>Done</em>.
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-body">
+      <strong>To use it:</strong> visit an AO3 work, tap the address bar,
+      type the first few letters of the bookmark name, tap it. Buttons appear.
+    </div>
+  </div>
+  <div class="note">
+    On iOS you can also type the bookmark name in the address bar to trigger it —
+    no need to open the bookmarks menu each time.
+  </div>
+</div>
+
+<!-- Android -->
+<div class="platform-steps" id="tab-android">
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-body">
+      <strong>Bookmark this page.</strong> Tap the three-dot menu → ☆ <em>Bookmark</em>.
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-body">
+      <strong>Edit the bookmark.</strong> Tap the three-dot menu → <em>Bookmarks</em>,
+      find "Chapter Kudos Install", long-press → <em>Edit bookmark</em>.
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-body">
+      <strong>Replace the URL</strong> with the code below, then tap <em>Save</em>:
+      <br/><br/>
+      <code id="bm-code-android" style="word-break:break-all; display:block; padding:0.6rem; line-height:1.5;">
+        Loading…
+      </code>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-body">
+      <strong>To use it:</strong> visit an AO3 work, tap the address bar,
+      type the bookmark name, tap it from the suggestions.
+    </div>
+  </div>
+</div>
+
+<hr class="divider"/>
+
+<p style="font-size:0.9rem; color:var(--muted); font-style:italic;">
+  Prefer a browser extension? Desktop users can also install the
+  <a href="https://github.com/YOUR_USERNAME/ao3-chapter-kudos" style="color:var(--gold)">
+    Chrome / Firefox extension
+  </a>
+  for automatic activation without tapping each time.
+</p>
+
+<footer>
+  <a href="https://github.com/YOUR_USERNAME/ao3-chapter-kudos">ao3-chapter-kudos</a>
+  — open source · self-hosted · your data stays yours
+</footer>
+
+<script>
+  // Fill in the bookmarklet href and code snippets from this page's own origin
+  const workerOrigin = window.location.origin;
+  const bmCode = `javascript:(function(){var s=document.createElement('script');s.src='${workerOrigin}/bookmarklet.js?v=1';document.body.appendChild(s);})();`;
+
+  document.getElementById('bm-link').href       = bmCode;
+  document.getElementById('bm-code-ios').textContent     = bmCode;
+  document.getElementById('bm-code-android').textContent = bmCode;
+
+  // Tab switching
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab, .platform-steps').forEach(el => el.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

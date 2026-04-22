@@ -1,0 +1,40 @@
+{
+  "manifest_version": 3,
+  "name": "AO3 Chapter Kudos",
+  "version": "1.0.0",
+  "description": "Leave kudos on individual chapters of AO3 works. Counts are shared across all readers.",
+
+  "icons": {
+    "16":  "icons/icon16.png",
+    "48":  "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png"
+    },
+    "default_title": "Chapter Kudos"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["*://archiveofourown.org/works/*"],
+      "js": [
+        "storage-adapters.js",
+        "content.js",
+        "kudos-core.js"
+      ],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+
+  "permissions": ["storage"],
+
+  "host_permissions": [
+    "*://archiveofourown.org/*"
+  ]
+}

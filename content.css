@@ -1,0 +1,171 @@
+/* AO3 Chapter Kudos — Injected Styles */
+
+:root {
+  --ck-heart:      #c0392b;
+  --ck-heart-glow: rgba(192, 57, 43, 0.3);
+  --ck-bg:         #fdf6f0;
+  --ck-border:     #d4b8a8;
+  --ck-text:       #5a3e36;
+  --ck-muted:      #9c7b6e;
+  --ck-radius:     12px;
+}
+
+/* ── Wrapper ─────────────────────────────────────────────────────────────── */
+.ck-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 2rem auto 1rem;
+  padding: 1rem 1.4rem 1.1rem;
+  max-width: 480px;
+  background: var(--ck-bg);
+  border: 1px solid var(--ck-border);
+  border-radius: var(--ck-radius);
+  font-family: Georgia, 'Times New Roman', serif;
+  box-shadow: 0 2px 10px rgba(90, 62, 54, 0.07);
+  position: relative;
+  /* Subtle diagonal texture */
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 8px,
+    rgba(192, 57, 43, 0.022) 8px,
+    rgba(192, 57, 43, 0.022) 9px
+  );
+}
+
+/* ── Chapter label ───────────────────────────────────────────────────────── */
+.ck-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ck-muted);
+}
+
+/* ── Row ─────────────────────────────────────────────────────────────────── */
+.ck-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* ── Button ──────────────────────────────────────────────────────────────── */
+.ck-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.5rem 1.2rem;
+  background: #fff;
+  border: 1.5px solid var(--ck-border);
+  border-radius: 99px;
+  font-family: Georgia, serif;
+  font-size: 0.9rem;
+  color: var(--ck-text);
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s, background 0.2s;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.ck-btn:hover:not(:disabled) {
+  border-color: var(--ck-heart);
+  box-shadow: 0 0 0 3px var(--ck-heart-glow);
+  transform: translateY(-1px);
+}
+
+.ck-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.ck-btn--given {
+  background: #fff0ee;
+  border-color: var(--ck-heart);
+  color: var(--ck-heart);
+  cursor: default;
+}
+
+.ck-btn--loading {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.ck-btn:disabled {
+  cursor: default;
+}
+
+/* ── Heart icon ──────────────────────────────────────────────────────────── */
+.ck-heart {
+  font-size: 1.1rem;
+  line-height: 1;
+  display: inline-block;
+}
+
+.ck-btn--given .ck-heart {
+  animation: ck-heartpop 0.4s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+/* ── Count ───────────────────────────────────────────────────────────────── */
+.ck-count {
+  font-size: 0.84rem;
+  color: var(--ck-muted);
+  font-style: italic;
+}
+
+.ck-count-num {
+  font-style: normal;
+  font-weight: bold;
+  color: var(--ck-text);
+}
+
+/* ── Toast ───────────────────────────────────────────────────────────────── */
+.ck-toast {
+  position: fixed;
+  bottom: 1.8rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(16px);
+  background: #2c1810;
+  color: #fdf6f0;
+  font-family: Georgia, serif;
+  font-size: 0.88rem;
+  padding: 0.55rem 1.3rem;
+  border-radius: 99px;
+  box-shadow: 0 4px 20px rgba(44,24,16,0.22);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s, transform 0.28s;
+  z-index: 99999;
+  white-space: nowrap;
+}
+
+.ck-toast--show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── Burst particles ─────────────────────────────────────────────────────── */
+.ck-particle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ck-heart);
+  pointer-events: none;
+  z-index: 99998;
+  animation: ck-burst 0.6s ease-out forwards;
+}
+
+/* ── Keyframes ───────────────────────────────────────────────────────────── */
+@keyframes ck-heartpop {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.6); }
+  65%  { transform: scale(0.9); }
+  100% { transform: scale(1.15); }
+}
+
+@keyframes ck-burst {
+  0%   { opacity: 1; transform: translate(0, 0) scale(1); }
+  100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.2); }
+}
