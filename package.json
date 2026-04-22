@@ -1,0 +1,15 @@
+{
+  "name": "ao3-chapter-kudos",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "icons": "python3 scripts/make-icons.py",
+    "build:extension": "node scripts/build.js",
+    "build": "npm run icons && npm run build:extension"
+  },
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}
