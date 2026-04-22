@@ -289,6 +289,99 @@
     .drop-warn { background: #f39c12; }
     .drop-bad  { background: var(--red); }
 
+    /* ── Export button ── */
+    .export-btn {
+      float: right;
+      font-family: 'Courier Prime', monospace;
+      font-size: 0.75rem;
+      padding: 0.25rem 0.7rem;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--muted);
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .export-btn:hover { color: var(--ink); border-color: var(--gold); }
+
+    /* ── History chart ── */
+    .history-section {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.6rem 1.6rem 1rem;
+      margin-top: 2rem;
+      box-shadow: 0 1px 8px rgba(44,24,16,0.05);
+    }
+
+    .history-chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      height: 80px;
+      padding-bottom: 22px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .history-col {
+      flex: 0 0 auto;
+      min-width: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 3px;
+      height: 100%;
+      position: relative;
+    }
+
+    .history-bar {
+      width: 100%;
+      background: var(--gold);
+      border-radius: 2px 2px 0 0;
+      opacity: 0.75;
+      min-height: 2px;
+      transition: opacity 0.15s;
+      position: relative;
+      cursor: default;
+    }
+    .history-bar:hover { opacity: 1; }
+
+    .history-bar-tooltip {
+      display: none;
+      position: absolute;
+      bottom: calc(100% + 5px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--ink);
+      color: var(--parchment);
+      font-size: 0.68rem;
+      padding: 2px 6px;
+      border-radius: 3px;
+      white-space: nowrap;
+      pointer-events: none;
+      font-family: 'Courier Prime', monospace;
+    }
+    .history-bar:hover .history-bar-tooltip { display: block; }
+
+    .history-label {
+      position: absolute;
+      bottom: 0;
+      font-size: 0.6rem;
+      color: var(--muted);
+      font-family: 'Courier Prime', monospace;
+      white-space: nowrap;
+      text-align: center;
+    }
+
+    .history-empty {
+      font-style: italic;
+      color: var(--muted);
+      font-size: 0.88rem;
+      padding: 1rem 0;
+    }
+
     /* ── Loading ── */
     .loading {
       text-align: center;
@@ -372,11 +465,18 @@
               <th>#</th>
               <th>Chapter ID</th>
               <th>Kudos</th>
-              <th>Drop-off from prev.</th>
+              <th>Drop-off from prev.
+                <button class="export-btn" id="btn-export" title="Download CSV">⬇ CSV</button>
+              </th>
             </tr>
           </thead>
           <tbody id="dash-table"></tbody>
         </table>
+      </div>
+
+      <div class="history-section" id="history-section" style="display:none">
+        <div class="section-title">Votes Over Time <span id="history-range" style="font-style:italic;font-weight:normal;text-transform:none;letter-spacing:0;color:var(--muted);font-size:0.75rem;"></span></div>
+        <div class="history-chart" id="history-chart"></div>
       </div>
     </div>
   </div>
@@ -394,6 +494,7 @@
   const $ = id => document.getElementById(id);
 
   let workerBase = window.location.origin; // dashboard is served from the worker itself
+  let currentData = null;
 
   // ── Login ──────────────────────────────────────────────────────────────────
   $('btn-load').addEventListener('click', loadDashboard);
@@ -419,15 +520,22 @@
     $('btn-load').textContent = 'Loading…';
 
     try {
-      const res = await fetch(`${workerBase}/dashboard/${workId}?key=${encodeURIComponent(secret)}`);
-      if (res.status === 401) {
+      const keyParam = encodeURIComponent(secret);
+      const [mainRes, histRes] = await Promise.all([
+        fetch(`${workerBase}/dashboard/${workId}?key=${keyParam}`),
+        fetch(`${workerBase}/dashboard/${workId}/history?key=${keyParam}`),
+      ]);
+
+      if (mainRes.status === 401) {
         $('error-msg').textContent = 'Incorrect secret key.';
         return;
       }
-      if (!res.ok) throw new Error('Server error');
+      if (!mainRes.ok) throw new Error('Server error');
 
-      const data = await res.json();
-      renderDashboard(workId, data);
+      const data    = await mainRes.json();
+      const history = histRes.ok ? await histRes.json() : null;
+      currentData   = data;
+      renderDashboard(workId, data, history);
     } catch (e) {
       $('error-msg').textContent = 'Could not connect to your worker. Check the URL.';
     } finally {
@@ -436,8 +544,29 @@
     }
   }
 
+  // ── CSV export ─────────────────────────────────────────────────────────────
+  $('btn-export').addEventListener('click', () => {
+    if (!currentData) return;
+    const rows = [['Chapter', 'Chapter ID', 'Kudos', 'Drop-off from prev.']];
+    currentData.chapters.forEach((ch, i) => {
+      const prev = i > 0 ? currentData.chapters[i - 1].count : null;
+      const drop = prev !== null && prev > 0
+        ? `${Math.round(((ch.count - prev) / prev) * 100)}%`
+        : '—';
+      rows.push([i + 1, ch.chapterId, ch.count, drop]);
+    });
+    const csv  = rows.map(r => r.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url  = URL.createObjectURL(blob);
+    const a    = Object.assign(document.createElement('a'), {
+      href: url, download: `chapter-kudos-${currentData.workId}.csv`,
+    });
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
   // ── Render ─────────────────────────────────────────────────────────────────
-  function renderDashboard(workId, data) {
+  function renderDashboard(workId, data, history) {
     $('login').style.display = 'none';
     $('dashboard').style.display = 'block';
     $('dash-loading').style.display = 'none';
@@ -449,17 +578,16 @@
     const chapters = data.chapters;
     const max = Math.max(...chapters.map(c => c.count), 1);
 
-    // Chart
+    // Chapter bar chart
     const chart = $('dash-chart');
     chart.innerHTML = '';
     chapters.forEach((ch, i) => {
-      const col  = document.createElement('div');
+      const col = document.createElement('div');
       col.className = 'chart-col';
 
-      const bar  = document.createElement('div');
+      const bar = document.createElement('div');
       bar.className = 'chart-bar';
-      const pct = Math.max((ch.count / max) * 132, 3);
-      bar.style.height = `${pct}px`;
+      bar.style.height = `${Math.max((ch.count / max) * 132, 3)}px`;
 
       const tip = document.createElement('div');
       tip.className = 'chart-bar-tooltip';
@@ -475,7 +603,7 @@
       chart.appendChild(col);
     });
 
-    // Table
+    // Drop-off table
     const tbody = $('dash-table');
     tbody.innerHTML = '';
     chapters.forEach((ch, i) => {
@@ -485,7 +613,7 @@
         : null;
 
       let dotClass = 'drop-ok';
-      let dropText = i === 0 ? '—' : `${drop > 0 ? '+' : ''}${drop}%`;
+      const dropText = i === 0 ? '—' : `${drop > 0 ? '+' : ''}${drop}%`;
       if (drop !== null && drop < -30) dotClass = 'drop-bad';
       else if (drop !== null && drop < -10) dotClass = 'drop-warn';
 
@@ -501,6 +629,49 @@
         </td>
       `;
       tbody.appendChild(tr);
+    });
+
+    // History chart
+    if (history && history.daily && history.daily.length > 0) {
+      renderHistory(history.daily);
+    }
+  }
+
+  function renderHistory(daily) {
+    $('history-section').style.display = 'block';
+
+    const maxCount = Math.max(...daily.map(d => d.count), 1);
+    const first    = daily[0].date;
+    const last     = daily[daily.length - 1].date;
+    $('history-range').textContent = daily.length > 1 ? `${first} – ${last}` : first;
+
+    const container = $('history-chart');
+    container.innerHTML = '';
+
+    daily.forEach(({ date, count }) => {
+      const col = document.createElement('div');
+      col.className = 'history-col';
+
+      const bar = document.createElement('div');
+      bar.className = 'history-bar';
+      bar.style.height = `${Math.max((count / maxCount) * 58, 2)}px`;
+
+      const tip = document.createElement('div');
+      tip.className = 'history-bar-tooltip';
+      tip.textContent = `${date}: ${count}`;
+      bar.appendChild(tip);
+
+      // Only show date label every ~7 bars to avoid crowding
+      const idx = daily.indexOf(daily.find(d => d.date === date));
+      if (idx % 7 === 0 || idx === daily.length - 1) {
+        const lbl = document.createElement('div');
+        lbl.className = 'history-label';
+        lbl.textContent = date.slice(5); // MM-DD
+        col.appendChild(lbl);
+      }
+
+      col.appendChild(bar);
+      container.appendChild(col);
     });
   }
 </script>
