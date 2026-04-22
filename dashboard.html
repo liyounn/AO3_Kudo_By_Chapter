@@ -28,10 +28,8 @@
       padding: 2rem 1rem 4rem;
     }
 
-    /* ── Layout ── */
     .container { max-width: 740px; margin: 0 auto; }
 
-    /* ── Header ── */
     header {
       text-align: center;
       padding: 2rem 0 2.5rem;
@@ -52,7 +50,6 @@
       font-size: 1rem;
     }
 
-    /* ── Login form ── */
     .login-card {
       max-width: 420px;
       margin: 3rem auto;
@@ -124,12 +121,9 @@
       min-height: 1.2em;
     }
 
-    /* ── Dashboard ── */
     #dashboard { display: none; }
 
-    .work-header {
-      margin-bottom: 2rem;
-    }
+    .work-header { margin-bottom: 2rem; }
 
     .work-id {
       font-family: 'Courier Prime', monospace;
@@ -155,7 +149,6 @@
       font-style: italic;
     }
 
-    /* ── Chart ── */
     .chart-section {
       background: white;
       border: 1px solid var(--border);
@@ -237,7 +230,6 @@
       text-align: center;
     }
 
-    /* ── Drop-off table ── */
     .table-section {
       background: white;
       border: 1px solid var(--border);
@@ -252,9 +244,7 @@
       font-size: 0.92rem;
     }
 
-    thead tr {
-      background: var(--parchment-dark);
-    }
+    thead tr { background: var(--parchment-dark); }
 
     th {
       padding: 0.7rem 1rem;
@@ -289,7 +279,6 @@
     .drop-warn { background: #f39c12; }
     .drop-bad  { background: var(--red); }
 
-    /* ── Export button ── */
     .export-btn {
       float: right;
       font-family: 'Courier Prime', monospace;
@@ -304,7 +293,6 @@
     }
     .export-btn:hover { color: var(--ink); border-color: var(--gold); }
 
-    /* ── History chart ── */
     .history-section {
       background: white;
       border: 1px solid var(--border);
@@ -382,7 +370,6 @@
       padding: 1rem 0;
     }
 
-    /* ── Loading ── */
     .loading {
       text-align: center;
       padding: 3rem;
@@ -423,7 +410,6 @@
     <div class="tagline">Writer Dashboard</div>
   </header>
 
-  <!-- Login -->
   <div id="login">
     <div class="login-card">
       <h2>Access your dashboard</h2>
@@ -440,7 +426,6 @@
     </div>
   </div>
 
-  <!-- Dashboard -->
   <div id="dashboard">
     <div class="work-header">
       <div class="work-id" id="dash-work-id"></div>
@@ -493,10 +478,9 @@
 <script>
   const $ = id => document.getElementById(id);
 
-  let workerBase = window.location.origin; // dashboard is served from the worker itself
+  let workerBase = window.location.origin;
   let currentData = null;
 
-  // ── Login ──────────────────────────────────────────────────────────────────
   $('btn-load').addEventListener('click', loadDashboard);
   [$('input-work-id'), $('input-secret')].forEach(el =>
     el.addEventListener('keydown', e => e.key === 'Enter' && loadDashboard())
@@ -544,7 +528,6 @@
     }
   }
 
-  // ── CSV export ─────────────────────────────────────────────────────────────
   $('btn-export').addEventListener('click', () => {
     if (!currentData) return;
     const rows = [['Chapter', 'Chapter ID', 'Kudos', 'Drop-off from prev.']];
@@ -565,7 +548,6 @@
     URL.revokeObjectURL(url);
   });
 
-  // ── Render ─────────────────────────────────────────────────────────────────
   function renderDashboard(workId, data, history) {
     $('login').style.display = 'none';
     $('dashboard').style.display = 'block';
@@ -578,7 +560,6 @@
     const chapters = data.chapters;
     const max = Math.max(...chapters.map(c => c.count), 1);
 
-    // Chapter bar chart
     const chart = $('dash-chart');
     chart.innerHTML = '';
     chapters.forEach((ch, i) => {
@@ -603,7 +584,6 @@
       chart.appendChild(col);
     });
 
-    // Drop-off table
     const tbody = $('dash-table');
     tbody.innerHTML = '';
     chapters.forEach((ch, i) => {
@@ -631,7 +611,6 @@
       tbody.appendChild(tr);
     });
 
-    // History chart
     if (history && history.daily && history.daily.length > 0) {
       renderHistory(history.daily);
     }
@@ -661,12 +640,11 @@
       tip.textContent = `${date}: ${count}`;
       bar.appendChild(tip);
 
-      // Only show date label every ~7 bars to avoid crowding
       const idx = daily.indexOf(daily.find(d => d.date === date));
       if (idx % 7 === 0 || idx === daily.length - 1) {
         const lbl = document.createElement('div');
         lbl.className = 'history-label';
-        lbl.textContent = date.slice(5); // MM-DD
+        lbl.textContent = date.slice(5);
         col.appendChild(lbl);
       }
 
