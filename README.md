@@ -60,7 +60,7 @@ https://ao3-chapter-kudos.YOUR-NAME.workers.dev
 ```
 
 ### 3. Set your secret key
-Cloudflare dashboard → Workers → your Worker → **Settings → Variables**
+Cloudflare dashboard → Workers → your Worker → **Settings → Variables and Secrets**
 
 Add: `WRITER_SECRET` = anything you'll remember (keep it private)
 
@@ -72,6 +72,8 @@ Add: `WRITER_SECRET` = anything you'll remember (keep it private)
   --ck-endpoint: "https://ao3-chapter-kudos.YOUR-NAME.workers.dev";
 }
 ```
+replace **YOUR-NAME** with your actual filler at cloudfare.
+Give the new workskin a title of "Chapter Kudos".
 
 ### 5. Apply skin to your works
 Edit Work → Custom Skin → select "Chapter Kudos" → save.

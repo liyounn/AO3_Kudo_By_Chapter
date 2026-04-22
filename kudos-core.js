@@ -44,12 +44,31 @@
 
   function discoverEndpoint() {
     try {
-      const raw = getComputedStyle(document.documentElement)
+      const skinEl = document.querySelector('#workskin') || document.documentElement;
+      let raw = '';
+
+      // Method 1: CSS custom property — works in AO3 site skins.
+      raw = getComputedStyle(skinEl)
         .getPropertyValue('--ck-endpoint')
         .trim()
         .replace(/['"]/g, '');
 
+      // Method 2: ::before content encoding — works in AO3 work skins.
+      // AO3 work skins block custom properties entirely, but allow the
+      // `content` property with plain strings. Writers set:
+      //   #workskin::before { content: "ck:your-worker.workers.dev"; ... }
+      if (!raw) {
+        const pseudo = getComputedStyle(skinEl, '::before').content;
+        // getComputedStyle returns the value CSS-quoted, e.g. '"ck:foo.dev"'
+        const inner = pseudo.replace(/^["']|["']$/g, '');
+        const m = inner.match(/^ck:(.+)$/);
+        if (m) raw = m[1];
+      }
+
       if (!raw) return null;
+
+      // Accept bare hostnames (AO3 sanitizer blocks URL values).
+      if (!raw.startsWith('http')) raw = 'https://' + raw;
 
       const url = new URL(raw);
       if (url.protocol !== 'https:') return null;
@@ -59,6 +78,7 @@
       return null;
     }
   }
+
 
   // ═══════════════════════════════════════════════════════════════════════════
   // Page Parsing
